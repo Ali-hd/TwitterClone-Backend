@@ -28,6 +28,10 @@ const tweetSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Comment'
     }],
+    replies:[{
+        type: Schema.Types.ObjectId,
+        ref: 'Reply'
+    }],
     user:{
         required: true,
         type: Schema.Types.ObjectId,

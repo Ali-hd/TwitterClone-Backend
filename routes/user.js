@@ -51,3 +51,6 @@ router.post('/:username/follow', passport.authenticate('jwt', {session: false}),
         res.status(500).json({success: false, msg: 'error following user'})
     }
 })
+
+
+module.exports = router

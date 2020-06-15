@@ -4,6 +4,7 @@ const app = express()
 const mongoose = require("mongoose")
 const cors = require('cors')
 const passport = require('passport')
+const methodOverride = require('method-override') 
 require('./passport');
 
 var authRout = require('./routes/auth')
@@ -24,17 +25,17 @@ app.get('/',async(req, res) =>{
    });
 
 app.use('/auth',authRout)
-app.use('/post',tweetRout)
+app.use('/tweet',tweetRout)
 app.use('/user', userRout)
 
 
 const connect = mongoose.connect(
-    process.env.DB_AUTH, {useNewUrlParser:true, useUnifiedTopology: true })
+    process.env.DB_AUTH, {useNewUrlParser:true, useUnifiedTopology: true})
 .then(console.log('MongoDB Connected!'))
 .catch(err=>console.log(err))
 
 const PORT = process.env.PORT || 5000
 
-server.listen(PORT, () => console.log(`server is running on port ${PORT}`))
+app.listen(PORT, () => console.log(`server is running on port ${PORT}`))
 
 module.exports = app;
