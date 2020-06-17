@@ -82,6 +82,17 @@ router.get('/:username/bookmarks', passport.authenticate('jwt', {session: false}
     }
 })
 
+router.get('/:username/lists', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+    //will ignore username param
+    try{
+        //need to add model: 'List' because list is a model
+        const user = await User.findOne({username: req.user.username},{lists: 1}).populate({ path:'lists', model: 'List', populate:{path:'user', select:'username profileImg name'}})
+        res.json({success: true, lists: user.lists})
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
 router.put('/:username', passport.authenticate('jwt', {session: false}), async (req,res)=>{
 
     try{

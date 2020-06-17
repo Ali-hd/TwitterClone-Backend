@@ -10,6 +10,7 @@ require('./passport');
 var authRout = require('./routes/auth')
 var userRout = require('./routes/user')
 var tweetRout = require('./routes/tweet')
+var listRout = require('./routes/lists')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -27,6 +28,7 @@ app.get('/',async(req, res) =>{
 app.use('/auth',authRout)
 app.use('/tweet',tweetRout)
 app.use('/user', userRout)
+app.use('/lists', listRout)
 
 
 const connect = mongoose.connect(

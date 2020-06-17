@@ -16,9 +16,9 @@ const listSchema = new Schema({
         default: "",
         type:String
     },
-    image:{
+    banner:{
         required: false,
-        default: "https://i.imgur.com/iV7Sdgm.jpg",
+        default: "https://pbs-o.twimg.com/media/EXZ3BXhUwAEFNBE?format=png&name=small",
         type: String
     },
     users:[{
