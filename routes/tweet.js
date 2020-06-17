@@ -31,10 +31,13 @@ router.post('/create', passport.authenticate('jwt', {session: false}),( async (r
         let tweet = await Tweet.create(newTweet)
         user.tweets.unshift(tweet)
         user.save()
-        res.json({msg:'tweet created successfully'})
+        //because mongodb responses are not normal objects
+        let popTweet = tweet.toObject()
+        popTweet.user = {username: user.username, name: user.name, profileImg: user.profileImg, _id: user._id }
+        res.json({success: true, msg:'tweet created successfully', tweet: popTweet})
     }catch(err){
         console.log(err)
-        res.status(400).json({msg:'error creating tweet'})
+        res.status(400).json({success: false, msg:'error creating tweet'})
     }
         
 })
@@ -82,7 +85,6 @@ router.post('/:id/bookmark', passport.authenticate('jwt', {session: false}), asy
             res.send({success: true, msg: 'bookmarked'})
         }
     }catch(error){
-        console.error(error);
         res.status(500).json({msg:'unknown server error'})
     }
 })
@@ -103,6 +105,55 @@ router.get('/:id', async(req,res)=>{
         res.send({success: true , tweet})
     }catch{
         res.send({success: false, msg:'unknown server error'})
+    }
+})
+
+router.post('/:id/retweet', passport.authenticate('jwt', {session: false}), async(req,res)=>{
+    
+    try{
+        let user = await User.findById(req.user._id)
+        let tweet = await Tweet.findById(req.params.id)
+        if(user.retweets.includes(req.params.id)){
+            //push to retweets just to check in frontend if i retweeted or not
+            var index = user.retweets.indexOf(req.params.id);
+            if (index !== -1){ user.retweets.splice(index, 1) }
+            var index2 = user.tweets.indexOf(req.params.id);
+            if (index2 !== -1){ user.tweets.splice(index2, 1) }
+            var index3 = tweet.retweets.indexOf(req.user._id);
+            if (index3 !== -1){ tweet.retweets.splice(index3, 1) } 
+            user.save()
+            tweet.save()
+            res.send({success: true, msg: 'undo retweet'})
+        }else{
+            user.retweets.unshift(req.params.id)
+            user.tweets.unshift(req.params.id)
+            tweet.retweets.unshift(req.user._id)
+            user.save()
+            tweet.save()
+            res.send({success: true, msg: 'retweeted'})
+        }
+    }catch(error){;
+        res.status(500).json({msg:'unknown server error'})
+    }
+})
+
+router.delete('/:id/delete', passport.authenticate('jwt', {session: false}), async(req, res)=>{
+    try{
+        let tweet = await Tweet.findById(req.params.id)
+        if(tweet.user.toString() == req.user._id){
+            Tweet.findByIdAndDelete(req.params.id)
+            .then(()=>{
+                res.send({success: true, msg: 'tweet deleted'})
+            })
+            .catch(()=>{
+                res.send({success: false, msg: 'Unknown server error'})
+            })
+        }else{
+            res.status(401).json({msg:'Unauthorized'})
+        }
+    }
+    catch{
+        res.send({success: false, msg: 'Unknown server error'})
     }
 })
 

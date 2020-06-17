@@ -33,6 +33,11 @@ const userSchema = new Schema({
         required: false , 
         type: String
     },
+    banner:{
+        default: "https://i.imgur.com/CAFy1oY.jpg",
+        required: false,
+        type: String
+    },
     location:{
         default: "",
         required: false , 

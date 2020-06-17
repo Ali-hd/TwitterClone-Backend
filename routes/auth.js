@@ -58,7 +58,7 @@ router.post('/register', function(req,res,next){
 
     router.get('/user', passport.authenticate('jwt', {session: false}), async (req,res)=>{
         try{
-            const user = await User.findOne({username: req.user.username},{profileImg: 1, likes: 1, following: 1, bookmarks: 1})
+            const user = await User.findOne({username: req.user.username},{profileImg: 1, likes: 1, following: 1, bookmarks: 1, username: 1, retweets: 1})
             res.send({success: true, account: user})
             
         }catch(error){

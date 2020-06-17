@@ -36,21 +36,75 @@ router.get('/:username', async (req,res)=>{
     }
 })
 
-router.post('/:username/follow', passport.authenticate('jwt', {session: false}), async (req,res)=>{
+router.post('/:id/follow', passport.authenticate('jwt', {session: false}), async (req,res)=>{
     try{
         const user = await User.findById(req.user._id)
-        const followUser = await User.findOne({username:req.params.username})
+        const followUser = await User.findById(req.params.id)
+        console.log(user.following,req.params.id)
+        if(user.following.includes(req.params.id)){
+            var index = user.following.indexOf(req.params.id)
+            if (index !== -1){ user.following.splice(index, 1) }
+            let index2 = followUser.followers.indexOf(user._id)
+            if(index2 !== -1){ followUser.followers.splice(index2, 1)}
+            user.save()
+            followUser.save()
+            res.send({success: true, msg: 'unfollow'})
+        }else{   
+            user.following.unshift(followUser)
+            user.save()
+            followUser.followers.unshift(user)
+            followUser.save()
+            res.send({success: true, msg:'follow'})
+        }
 
-        user.following.unshift(followUser)
-        user.save()
-        followUser.followers.unshift(user)
-        followUser.save()
-
-        res.json({success: true, msg:'followed successfully'})
+        
     }catch(error){
         res.status(500).json({success: false, msg: 'error following user'})
     }
 })
+
+router.get('/:username/tweets', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+    try{
+        const user = await User.findOne({username: req.params.username}).populate({path:'tweets likes retweets', populate:{path:'user', select:'username profileImg name'}})
+        res.json({success: true, user})
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
+router.get('/:username/bookmarks', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+    //will ignore username param
+    try{
+        const user = await User.findOne({username: req.user.username},{bookmarks: 1}).populate({path:'bookmarks', populate:{path:'user', select:'username profileImg name'}})
+        res.json({success: true, bookmarks: user.bookmarks})
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
+router.put('/:username', passport.authenticate('jwt', {session: false}), async (req,res)=>{
+
+    try{
+        let updateUser = {
+            name: req.body.name,
+            description: req.body.description,
+            location: req.body.location,
+            profileImg: req.body.profileImg,
+            banner: req.body.banner,
+        }
+
+    Object.keys(updateUser).forEach(key => updateUser[key] === undefined || updateUser[key] === '' ? delete updateUser[key]:null)
+
+    User.findOneAndUpdate({username:req.user.username}, updateUser, { useFindAndModify: false })
+    .then((x)=> {
+    res.json({success: true, msg:'user has been updated'})})
+    .catch(err=>res.status(500).json({success: false, msg:'unknown server error'}))
+
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
 
 
 module.exports = router
