@@ -65,7 +65,11 @@ router.post('/:id/follow', passport.authenticate('jwt', {session: false}), async
 
 router.get('/:username/tweets', passport.authenticate('jwt', {session: false}),async (req,res)=>{
     try{
-        const user = await User.findOne({username: req.params.username}).populate({path:'tweets likes retweets', populate:{path:'user', select:'username profileImg name'}})
+        const user = await User.findOne({username: req.params.username}).populate({path:'tweets likes retweets',
+        populate:{path:'user', model:'User', select:'username profileImg name'}})
+        .populate({path:'tweets likes retweets', populate:{path: 'parent',
+         populate:{path:'user', model:'User', select:'username profileImg name'}}})
+         
         res.json({success: true, user})
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})
@@ -86,7 +90,7 @@ router.get('/:username/lists', passport.authenticate('jwt', {session: false}),as
     //will ignore username param
     try{
         //need to add model: 'List' because list is a model
-        const user = await User.findOne({username: req.user.username},{lists: 1}).populate({ path:'lists', model: 'List', populate:{path:'user', select:'username profileImg name'}})
+        const user = await User.findOne({username: req.user.username},{lists: 1}).populate({ path:'lists', model: 'List', select: 'name banner'})
         res.json({success: true, lists: user.lists})
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})

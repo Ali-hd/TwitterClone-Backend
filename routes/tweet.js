@@ -25,12 +25,18 @@ router.post('/create', passport.authenticate('jwt', {session: false}),( async (r
         description: req.body.description,
         images: req.body.images,
         user: req.user._id,
+        parent: req.body.parent ? req.body.parent : null
     }
     try{
         let user = await User.findById(req.user._id)
         let tweet = await Tweet.create(newTweet)
         user.tweets.unshift(tweet)
         user.save()
+        if(req.body.parent){
+            let parent = await Tweet.findById(req.body.parent)
+            parent.replies.unshift(tweet)
+            parent.save()
+        }
         //because mongodb responses are not normal objects
         let popTweet = tweet.toObject()
         popTweet.user = {username: user.username, name: user.name, profileImg: user.profileImg, _id: user._id }
@@ -91,19 +97,21 @@ router.post('/:id/bookmark', passport.authenticate('jwt', {session: false}), asy
 
 router.get('/', async(req, res)=>{
     try{
-        let tweets = await Tweet.find().populate('user','username name _id profileImg').sort({ _id: -1 })
+        let tweets = await Tweet.find().populate('user','username name _id profileImg').sort({ _id: -1 }).populate({path: 'parent', populate:{path: 'user', select: 'username profileImg name'}})
         res.send({success: true, tweets})
-    }catch{
+    }catch(err){
+        console.log(err)
         res.send({success: false, msg:'unknown server error'})
     }
 })
 
 router.get('/:id', async(req,res)=>{
     try{
-        const tweet = await Tweet.findById(req.params.id).populate()
+        const tweet = await Tweet.findById(req.params.id).populate({path:'user', select:'username profileImg name'}).populate({path: 'replies', populate:{path:'user', model:'User', select: 'username profileImg name'}})
         tweet.save()
         res.send({success: true , tweet})
-    }catch{
+    }catch(err){
+        console.log(err)
         res.send({success: false, msg:'unknown server error'})
     }
 })

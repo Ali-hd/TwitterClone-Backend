@@ -16,10 +16,10 @@ const tweetSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Likes'
     }],
-    parent:[{
+    parent:{
         type: Schema.Types.ObjectId,
-        ref: 'Reply'
-    }],
+        ref: 'Tweet'
+    },
     retweets:[{
         type: Schema.Types.ObjectId,
         ref: 'Retweets'
@@ -30,7 +30,7 @@ const tweetSchema = new Schema({
     }],
     replies:[{
         type: Schema.Types.ObjectId,
-        ref: 'Reply'
+        ref: 'Tweet'
     }],
     user:{
         required: true,
