@@ -74,12 +74,13 @@ router.get('/:username/tweets', passport.authenticate('jwt', {session: false}),a
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})
     }
-})
+})        
 
 router.get('/:username/bookmarks', passport.authenticate('jwt', {session: false}),async (req,res)=>{
     //will ignore username param
     try{
         const user = await User.findOne({username: req.user.username},{bookmarks: 1}).populate({path:'bookmarks', populate:{path:'user', select:'username profileImg name'}})
+        .populate({path:'bookmarks', populate:{path:'parent', populate:{path:'user', model:'User', select:'username profileImg name'}}})
         res.json({success: true, bookmarks: user.bookmarks})
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})
@@ -117,6 +118,18 @@ router.put('/:username', passport.authenticate('jwt', {session: false}), async (
 
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
+router.post('/', async (req,res)=>{    
+    //will ignore username param
+    //should be get req but get doesnt accept body
+    try{
+        let result = await User.find({ $or:[{username: new RegExp(req.body.username, 'i')},{name: new RegExp(req.body.username, 'i')}]},{username: 1, name: 1, profileImg: 1, description: 1}).exec()
+        res.status(200).send({success: true, result})
+    }catch(err){
+        console.log(err)
+        res.status(500).json({success: false, msg: 'Unknown server error'})
     }
 })
 

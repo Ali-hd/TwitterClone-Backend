@@ -69,7 +69,7 @@ const userSchema = new Schema({
     }],
     lists:[{
         type:Schema.Types.ObjectId,
-        ref:'Tweet'
+        ref:'List'
     }],
     notifications:{
         required: false,

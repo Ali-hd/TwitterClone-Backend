@@ -6,6 +6,7 @@ const Tweet = require('../models/tweet')
 const User = require('../models/user')
 
 const upload = require('../imgUpload')
+const Hashtag = require('../models/hashtag')
 const singleUpload = upload.single('image')
 
 router.post('/upload', function(req,res){
@@ -27,19 +28,39 @@ router.post('/create', passport.authenticate('jwt', {session: false}),( async (r
         user: req.user._id,
         parent: req.body.parent ? req.body.parent : null
     }
+
+    let hashtags = req.body.hashtags
+    
     try{
         let user = await User.findById(req.user._id)
         let tweet = await Tweet.create(newTweet)
         user.tweets.unshift(tweet)
         user.save()
+        let parent
         if(req.body.parent){
-            let parent = await Tweet.findById(req.body.parent)
+            parent = await Tweet.findById(req.body.parent).populate('user','username name profileImg')
             parent.replies.unshift(tweet)
             parent.save()
         }
+
+        let hash 
+        let newHash
+        if(hashtags)
+        for(let i=0; i<hashtags.length;i++){
+            hash = await Hashtag.findOne({content: hashtags[i]})
+            if(!hash){
+                newHash = { content: hashtags[i] }
+                hash = await Hashtag.create(newHash)
+            }
+            hash.tweets.unshift(tweet)
+            hash.count = hash.count + 1
+            hash.save()
+        }
+
         //because mongodb responses are not normal objects
         let popTweet = tweet.toObject()
         popTweet.user = {username: user.username, name: user.name, profileImg: user.profileImg, _id: user._id }
+        if(parent){popTweet.parent = parent}
         res.json({success: true, msg:'tweet created successfully', tweet: popTweet})
     }catch(err){
         console.log(err)
@@ -97,7 +118,7 @@ router.post('/:id/bookmark', passport.authenticate('jwt', {session: false}), asy
 
 router.get('/', async(req, res)=>{
     try{
-        let tweets = await Tweet.find().populate('user','username name _id profileImg').sort({ _id: -1 }).populate({path: 'parent', populate:{path: 'user', select: 'username profileImg name'}})
+        let tweets = await Tweet.find().populate('user','username name profileImg').sort({ _id: -1 }).populate({path: 'parent', populate:{path: 'user', select: 'username profileImg name'}})
         res.send({success: true, tweets})
     }catch(err){
         console.log(err)
@@ -164,5 +185,6 @@ router.delete('/:id/delete', passport.authenticate('jwt', {session: false}), asy
         res.send({success: false, msg: 'Unknown server error'})
     }
 })
+
 
 module.exports = router

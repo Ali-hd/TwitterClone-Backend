@@ -11,6 +11,7 @@ var authRout = require('./routes/auth')
 var userRout = require('./routes/user')
 var tweetRout = require('./routes/tweet')
 var listRout = require('./routes/lists')
+var trendRout = require('./routes/trend')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -29,7 +30,7 @@ app.use('/auth',authRout)
 app.use('/tweet',tweetRout)
 app.use('/user', userRout)
 app.use('/lists', listRout)
-
+app.use('/trend', trendRout)
 
 const connect = mongoose.connect(
     process.env.DB_AUTH, {useNewUrlParser:true, useUnifiedTopology: true})

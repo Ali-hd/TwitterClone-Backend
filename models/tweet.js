@@ -14,7 +14,7 @@ const tweetSchema = new Schema({
     },
     likes:[{
         type: Schema.Types.ObjectId,
-        ref: 'Likes'
+        ref: 'User'
     }],
     parent:{
         type: Schema.Types.ObjectId,
@@ -22,11 +22,7 @@ const tweetSchema = new Schema({
     },
     retweets:[{
         type: Schema.Types.ObjectId,
-        ref: 'Retweets'
-    }],
-    comments:[{
-        type: Schema.Types.ObjectId,
-        ref: 'Comment'
+        ref: 'Tweet'
     }],
     replies:[{
         type: Schema.Types.ObjectId,
@@ -37,6 +33,10 @@ const tweetSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    thread: {
+        type: Array,
+        default: []
+    }
 },{timestamps: true})
 
 const Tweet = mongoose.model('Tweet',tweetSchema)
