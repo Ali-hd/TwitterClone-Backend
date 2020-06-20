@@ -125,11 +125,32 @@ router.post('/', async (req,res)=>{
     //will ignore username param
     //should be get req but get doesnt accept body
     try{
-        let result = await User.find({ $or:[{username: new RegExp(req.body.username, 'i')},{name: new RegExp(req.body.username, 'i')}]},{username: 1, name: 1, profileImg: 1, description: 1}).exec()
-        res.status(200).send({success: true, result})
+        let resultUsers = await User.find({ $or:[{username: new RegExp(req.body.username, 'i')},{name: new RegExp(req.body.username, 'i')}]},{username: 1, name: 1, profileImg: 1, description: 1}).exec()
+        res.status(200).send({success: true, resultUsers})
     }catch(err){
         console.log(err)
         res.status(500).json({success: false, msg: 'Unknown server error'})
+    }
+})
+
+router.get('/:username/followers', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+    //will ignore username param
+    try{
+        const user = await User.findOne({username: req.user.username},{followers: 1, following: 1}).populate({ path:'followers', model: 'User', select: 'name username profileImg description'})
+        .populate({ path:'following', model: 'User', select: 'name username profileImg description'})
+        res.json({success: true, followers: user.followers, following: user.following})
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
+    }
+})
+
+router.get('/:username/suggestions', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+    //will ignore username param
+    try{
+        const users = await User.find({_id: { $nin: req.user.following}},{profileImg:1, name: 1, username: 1})
+        res.json({success: true, suggestions: users})
+    }catch(error){
+        res.status(500).json({success: false, msg: 'unknown server error'})
     }
 })
 

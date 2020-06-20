@@ -36,6 +36,16 @@ const tweetSchema = new Schema({
     thread: {
         type: Array,
         default: []
+    },
+    username: {
+        type: String,
+    },
+    name: {
+        type: String
+    },
+    retweeted: {
+        type: Boolean,
+        default: false
     }
 },{timestamps: true})
 

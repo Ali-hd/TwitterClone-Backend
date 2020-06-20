@@ -69,7 +69,7 @@ router.delete('/:id/delete', passport.authenticate('jwt', {session: false}), asy
 
 router.get('/:id', passport.authenticate('jwt', {session: false}), async(req,res)=>{
     try{
-        const list = await List.findById(req.params.id).populate('user','name username profileImg').populate('users', 'username')
+        const list = await List.findById(req.params.id).populate('user','name username profileImg').populate('users', 'username name profileImg')
         let users = [] 
         for(let i = 0; i < list.users.length; i++){
             users.push(list.users[i]._id)
@@ -91,7 +91,6 @@ router.post('/:username/:id', passport.authenticate('jwt', {session: false}),( a
         if(list.users.includes(user._id)){
             var index = list.users.indexOf(user._id);
             if (index !== -1){ list.users.splice(index, 1) }
-            list.save()
             res.send({success: true, msg:'user removed'})
         }else{
             list.users.push(user)

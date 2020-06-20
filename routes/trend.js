@@ -28,4 +28,16 @@ router.get('/:hashtag', async(req,res)=>{
     }
 })
 
+router.post('/', async (req,res)=>{    
+    //will ignore username param
+    //should be get req but get doesnt accept body
+    try{
+        let result = await Tweet.find({ $or:[{description: new RegExp(req.body.description, 'i')},{username: new RegExp(req.body.description, 'i')},{name: new RegExp(req.body.description, 'i')}]}).populate('user','profileImg name username').populate({path: 'parent', populate:{path:'user', model:'User', select:'username profileImg name'}}).limit(10).exec()
+        res.status(200).send({success: true, result})
+    }catch(err){
+        console.log(err)
+        res.status(500).json({success: false, msg: 'Unknown server error'})
+    }
+})
+
 module.exports = router

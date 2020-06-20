@@ -26,7 +26,9 @@ router.post('/create', passport.authenticate('jwt', {session: false}),( async (r
         description: req.body.description,
         images: req.body.images,
         user: req.user._id,
-        parent: req.body.parent ? req.body.parent : null
+        parent: req.body.parent ? req.body.parent : null,
+        username: req.user.username,
+        name: req.user.name
     }
 
     let hashtags = req.body.hashtags
