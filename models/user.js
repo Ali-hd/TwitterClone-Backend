@@ -79,8 +79,11 @@ const userSchema = new Schema({
     theme: {
         type: String,
         default: 'light'
-    }
-
+    },
+    conversations:[{
+        type:Schema.Types.ObjectId,
+        ref:'Conversation'
+    }]
 },{timestamps: true},)
 
 const User = mongoose.model('User',userSchema)

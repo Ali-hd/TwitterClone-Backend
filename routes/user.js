@@ -138,7 +138,7 @@ router.post('/', async (req,res)=>{
 router.get('/:username/followers', passport.authenticate('jwt', {session: false}),async (req,res)=>{
     //will ignore username param
     try{
-        const user = await User.findOne({username: req.user.username},{followers: 1, following: 1}).populate({ path:'followers', model: 'User', select: 'name username profileImg description'})
+        const user = await User.findOne({username: req.params.username},{followers: 1, following: 1}).populate({ path:'followers', model: 'User', select: 'name username profileImg description'})
         .populate({ path:'following', model: 'User', select: 'name username profileImg description'})
         res.json({success: true, followers: user.followers, following: user.following})
     }catch(error){
@@ -149,7 +149,7 @@ router.get('/:username/followers', passport.authenticate('jwt', {session: false}
 router.get('/:username/suggestions', passport.authenticate('jwt', {session: false}),async (req,res)=>{
     //will ignore username param
     try{
-        const users = await User.find({_id: { $nin: req.user.following}},{profileImg:1, name: 1, username: 1}).limit(3)
+        const users = await User.find({_id: { $nin: req.user.following}},{profileImg:1, name: 1, username: 1}).limit(4)
         res.json({success: true, suggestions: users})
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})

@@ -144,7 +144,6 @@ router.post('/:id/retweet', passport.authenticate('jwt', {session: false}), asyn
     try{
         let user = await User.findById(req.user._id)
         let tweet = await Tweet.findById(req.params.id)
-
         if(user.retweets.includes(req.params.id)){
             //delete user tweet retweet
             if(req.body.retweetId){ await Tweet.findOneAndDelete({_id: req.body.retweetId}) }
@@ -153,10 +152,8 @@ router.post('/:id/retweet', passport.authenticate('jwt', {session: false}), asyn
             //push to retweets just to check in frontend if user retweeted or not
             var index = user.retweets.indexOf(req.params.id);
             if (index !== -1){ user.retweets.splice(index, 1) }
-            var index2 = user.tweets.indexOf(req.params.id);
-            if (index2 !== -1){ user.tweets.splice(index2, 1) }
-            var index3 = tweet.retweets.indexOf(req.user._id);
-            if (index3 !== -1){ tweet.retweets.splice(index3, 1) } 
+            var tweetIndex = tweet.retweets.indexOf(req.user._id);
+            if (tweetIndex !== -1){ tweet.retweets.splice(tweetIndex, 1) } 
             user.save()
             tweet.save()
             res.send({success: true, msg: 'undo retweet'})
