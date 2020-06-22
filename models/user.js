@@ -75,6 +75,10 @@ const userSchema = new Schema({
         required: false,
         default: [],
         type: Array
+    },
+    theme: {
+        type: String,
+        default: 'light'
     }
 
 },{timestamps: true},)

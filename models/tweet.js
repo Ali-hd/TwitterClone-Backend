@@ -8,7 +8,6 @@ const tweetSchema = new Schema({
         type:String
     },
     images:{
-        required: true,
         default: [],
         type: Array
     },
@@ -43,9 +42,9 @@ const tweetSchema = new Schema({
     name: {
         type: String
     },
-    retweeted: {
-        type: Boolean,
-        default: false
+    retweet: {
+        type: Schema.Types.ObjectId,
+        ref: 'Tweet'
     }
 },{timestamps: true})
 

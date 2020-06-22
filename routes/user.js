@@ -40,7 +40,6 @@ router.post('/:id/follow', passport.authenticate('jwt', {session: false}), async
     try{
         const user = await User.findById(req.user._id)
         const followUser = await User.findById(req.params.id)
-        console.log(user.following,req.params.id)
         if(user.following.includes(req.params.id)){
             var index = user.following.indexOf(req.params.id)
             if (index !== -1){ user.following.splice(index, 1) }
@@ -68,6 +67,8 @@ router.get('/:username/tweets', passport.authenticate('jwt', {session: false}),a
         const user = await User.findOne({username: req.params.username}).populate({path:'tweets likes retweets',
         populate:{path:'user', model:'User', select:'username profileImg name'}})
         .populate({path:'tweets likes retweets', populate:{path: 'parent',
+         populate:{path:'user', model:'User', select:'username profileImg name'}}})
+         .populate({path:'tweets likes retweets', populate:{path: 'retweet',
          populate:{path:'user', model:'User', select:'username profileImg name'}}})
          
         res.json({success: true, user})
@@ -107,6 +108,7 @@ router.put('/:username', passport.authenticate('jwt', {session: false}), async (
             location: req.body.location,
             profileImg: req.body.profileImg,
             banner: req.body.banner,
+            theme: req.body.theme
         }
 
     Object.keys(updateUser).forEach(key => updateUser[key] === undefined || updateUser[key] === '' ? delete updateUser[key]:null)
@@ -147,7 +149,7 @@ router.get('/:username/followers', passport.authenticate('jwt', {session: false}
 router.get('/:username/suggestions', passport.authenticate('jwt', {session: false}),async (req,res)=>{
     //will ignore username param
     try{
-        const users = await User.find({_id: { $nin: req.user.following}},{profileImg:1, name: 1, username: 1})
+        const users = await User.find({_id: { $nin: req.user.following}},{profileImg:1, name: 1, username: 1}).limit(3)
         res.json({success: true, suggestions: users})
     }catch(error){
         res.status(500).json({success: false, msg: 'unknown server error'})

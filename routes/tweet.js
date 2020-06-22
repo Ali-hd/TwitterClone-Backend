@@ -120,7 +120,7 @@ router.post('/:id/bookmark', passport.authenticate('jwt', {session: false}), asy
 
 router.get('/', async(req, res)=>{
     try{
-        let tweets = await Tweet.find().populate('user','username name profileImg').sort({ _id: -1 }).populate({path: 'parent', populate:{path: 'user', select: 'username profileImg name'}})
+        let tweets = await Tweet.find().populate('user','username name profileImg').sort({ _id: -1 }).populate({path: 'parent', populate:{path: 'user', select: 'username profileImg name'}}).populate({path: 'retweet', model: 'Tweet', populate:{path: 'user', select: 'username profileImg name'}}).populate({path: 'parent', populate:{path: 'parent', modal: 'Tweet', select: 'username'}})
         res.send({success: true, tweets})
     }catch(err){
         console.log(err)
@@ -144,8 +144,13 @@ router.post('/:id/retweet', passport.authenticate('jwt', {session: false}), asyn
     try{
         let user = await User.findById(req.user._id)
         let tweet = await Tweet.findById(req.params.id)
+
         if(user.retweets.includes(req.params.id)){
-            //push to retweets just to check in frontend if i retweeted or not
+            //delete user tweet retweet
+            if(req.body.retweetId){ await Tweet.findOneAndDelete({_id: req.body.retweetId}) }
+            await Tweet.findOneAndDelete({retweet: req.params.id})
+
+            //push to retweets just to check in frontend if user retweeted or not
             var index = user.retweets.indexOf(req.params.id);
             if (index !== -1){ user.retweets.splice(index, 1) }
             var index2 = user.tweets.indexOf(req.params.id);
@@ -156,14 +161,25 @@ router.post('/:id/retweet', passport.authenticate('jwt', {session: false}), asyn
             tweet.save()
             res.send({success: true, msg: 'undo retweet'})
         }else{
+
+            let newRetweet = {
+                user: req.user._id,
+                retweet: tweet._id,
+                username: req.user.username,
+                name: req.user.name,
+                description: `${"retweeted from " + tweet._id}`
+            }
+
+            let retweet = await Tweet.create(newRetweet)
             user.retweets.unshift(req.params.id)
-            user.tweets.unshift(req.params.id)
+            user.tweets.unshift(retweet)
             tweet.retweets.unshift(req.user._id)
             user.save()
             tweet.save()
             res.send({success: true, msg: 'retweeted'})
         }
     }catch(error){;
+        console.log(error)
         res.status(500).json({msg:'unknown server error'})
     }
 })

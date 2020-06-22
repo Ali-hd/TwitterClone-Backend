@@ -76,6 +76,7 @@ router.get('/:id', passport.authenticate('jwt', {session: false}), async(req,res
         }
         const listTweets = await Tweet.find().where('user').in(users).sort({_id: -1})
         .populate('user','username name _id profileImg').populate({path: 'parent',
+         populate:{path: 'user', select: 'username profileImg name'}}).populate({path: 'retweet',
          populate:{path: 'user', select: 'username profileImg name'}}).exec()
         res.send({success: true , list, listTweets})
     }catch(err){
