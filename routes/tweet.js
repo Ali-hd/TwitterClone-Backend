@@ -185,6 +185,12 @@ router.delete('/:id/delete', passport.authenticate('jwt', {session: false}), asy
     try{
         let tweet = await Tweet.findById(req.params.id)
         if(tweet.user.toString() == req.user._id){
+            if(tweet.parent){
+                let parent = await Tweet.findById(tweet.parent)
+                let index = parent.replies.indexOf(req.params.id);
+                if (index !== -1){ parent.replies.splice(index, 1) }
+                parent.save()
+            }
             Tweet.findByIdAndDelete(req.params.id)
             .then(()=>{
                 res.send({success: true, msg: 'tweet deleted'})
