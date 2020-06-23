@@ -99,7 +99,7 @@ io.on("connection", socket =>{
                     }
                     io.in(msg.room).clients( async (err, clients)=>{
                         if(clients.length<2){
-                            let receiver = await User.findById(msg.id)
+                            // let receiver = await User.findById(msg.id)
 
                             // if(!receiver.notifications.find(x=> x.from == socket.decoded.id)){
                             //     receiver.notifications.push({

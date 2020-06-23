@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user')
 const { Conversation, Message } = require('../models/chat')
 
-//get user conversations
+//get all user conversations
 router.get('/conversations', passport.authenticate('jwt', {session: false}), async (req,res)=>{
     try{
         const conversations = await User.findOne({username: req.user.username},{conversations: 1})
@@ -44,7 +44,7 @@ router.get('/conversation', passport.authenticate('jwt', {session: false}), asyn
     }
 })
 
-//start
+//start a conv
 router.post('/conversation', passport.authenticate('jwt', {session: false}), async (req,res)=>{
 
     let user1 = req.user._id
