@@ -8,7 +8,7 @@ const Hashtag = require('../models/hashtag')
 
 router.get('/', async(req,res)=>{
     try{
-        let hashtags = await Hashtag.find().sort({"count": -1}).exec()
+        let hashtags = await Hashtag.find().limit(10).sort({"count": -1}).exec()
         res.send({success: true, trends: hashtags})
     }catch(err){
         console.log(err)
