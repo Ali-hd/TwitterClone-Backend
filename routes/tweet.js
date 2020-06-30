@@ -9,16 +9,16 @@ const upload = require('../imgUpload')
 const Hashtag = require('../models/hashtag')
 const singleUpload = upload.single('image')
 
-// router.post('/upload', function(req,res){
-//     console.log('upload', req.body)
-//     singleUpload(req,res, function(err){
-//         if(err){
-//             res.status(422).send({error:err.message})
-//         }else{
-//             return res.json({'imageUrl':req.file.location});
-//         }
-//     });  
-// });
+router.post('/upload', function(req,res){
+    console.log('upload', req.body)
+    singleUpload(req,res, function(err){
+        if(err){
+            res.status(422).send({error:err.message})
+        }else{
+            return res.json({'imageUrl':req.file.location});
+        }
+    });  
+});
 
 router.post('/create', passport.authenticate('jwt', {session: false}),( async (req,res) =>{
  
