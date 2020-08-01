@@ -62,7 +62,7 @@ router.post('/:id/follow', passport.authenticate('jwt', {session: false}), async
     }
 })
 
-router.get('/:username/tweets', passport.authenticate('jwt', {session: false}),async (req,res)=>{
+router.get('/:username/tweets', async (req,res)=>{
     try{
         const user = await User.findOne({username: req.params.username}).populate({path:'tweets likes retweets',
         populate:{path:'user', model:'User', select:'username profileImg name'}})
